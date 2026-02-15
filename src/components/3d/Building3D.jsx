@@ -52,6 +52,8 @@ function Building3D() {
   const [selectedFloor, setSelectedFloor] = useState('all')
   const [showCeiling, setShowCeiling] = useState(false)
   const [viewAngle, setViewAngle] = useState('perspective')
+  const [showFloorSelector, setShowFloorSelector] = useState(true)
+  const [showViewControls, setShowViewControls] = useState(false)
 
   const floorButtons = [
     { id: 'all', label: 'All Floors' },
@@ -67,65 +69,91 @@ function Building3D() {
 
   return (
     <div className="building-3d-container">
-      {/* Floor selector */}
-      <div className="floor-selector">
-        <div style={{ fontSize: '12px', fontWeight: 'bold', color: '#C4B5A3', marginBottom: '8px' }}>
-          Select Floor
-        </div>
-        {floorButtons.map(btn => (
-          <button
-            key={btn.id}
-            className={`floor-btn ${selectedFloor === btn.id ? 'active' : ''}`}
-            onClick={() => setSelectedFloor(btn.id)}
-          >
-            {btn.label}
-          </button>
-        ))}
+      {/* Mobile toggle buttons */}
+      <div className="mobile-toggle-buttons">
+        <button
+          className={`mobile-toggle ${showFloorSelector ? 'active' : ''}`}
+          onClick={() => {
+            setShowFloorSelector(!showFloorSelector)
+            setShowViewControls(false)
+          }}
+        >
+          🏢 Floors
+        </button>
+        <button
+          className={`mobile-toggle ${showViewControls ? 'active' : ''}`}
+          onClick={() => {
+            setShowViewControls(!showViewControls)
+            setShowFloorSelector(false)
+          }}
+        >
+          👁️ View
+        </button>
       </div>
+
+      {/* Floor selector */}
+      {showFloorSelector && (
+        <div className="floor-selector">
+          <div style={{ fontSize: '12px', fontWeight: 'bold', color: '#C4B5A3', marginBottom: '8px' }}>
+            Select Floor
+          </div>
+          {floorButtons.map(btn => (
+            <button
+              key={btn.id}
+              className={`floor-btn ${selectedFloor === btn.id ? 'active' : ''}`}
+              onClick={() => setSelectedFloor(btn.id)}
+            >
+              {btn.label}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* View controls */}
-      <div className="view-controls">
-        <div style={{ fontSize: '12px', fontWeight: 'bold', color: '#C4B5A3', marginBottom: '8px' }}>
-          View Angle
-        </div>
-        <button
-          className={`view-btn ${viewAngle === 'perspective' ? 'active' : ''}`}
-          onClick={() => setViewAngle('perspective')}
-        >
-          📐 Perspective
-        </button>
-        <button
-          className={`view-btn ${viewAngle === 'top' ? 'active' : ''}`}
-          onClick={() => setViewAngle('top')}
-        >
-          ⬇️ Top View
-        </button>
-        <button
-          className={`view-btn ${viewAngle === 'front' ? 'active' : ''}`}
-          onClick={() => setViewAngle('front')}
-        >
-          👁️ Front View
-        </button>
-        <button
-          className={`view-btn ${viewAngle === 'side' ? 'active' : ''}`}
-          onClick={() => setViewAngle('side')}
-        >
-          👁️ Side View
-        </button>
+      {showViewControls && (
+        <div className="view-controls">
+          <div style={{ fontSize: '12px', fontWeight: 'bold', color: '#C4B5A3', marginBottom: '8px' }}>
+            View Angle
+          </div>
+          <button
+            className={`view-btn ${viewAngle === 'perspective' ? 'active' : ''}`}
+            onClick={() => setViewAngle('perspective')}
+          >
+            📐 Perspective
+          </button>
+          <button
+            className={`view-btn ${viewAngle === 'top' ? 'active' : ''}`}
+            onClick={() => setViewAngle('top')}
+          >
+            ⬇️ Top View
+          </button>
+          <button
+            className={`view-btn ${viewAngle === 'front' ? 'active' : ''}`}
+            onClick={() => setViewAngle('front')}
+          >
+            👁️ Front View
+          </button>
+          <button
+            className={`view-btn ${viewAngle === 'side' ? 'active' : ''}`}
+            onClick={() => setViewAngle('side')}
+          >
+            👁️ Side View
+          </button>
 
-        <div style={{ fontSize: '12px', fontWeight: 'bold', color: '#C4B5A3', marginTop: '12px', marginBottom: '8px' }}>
-          Display Options
+          <div style={{ fontSize: '12px', fontWeight: 'bold', color: '#C4B5A3', marginTop: '12px', marginBottom: '8px' }}>
+            Display Options
+          </div>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#E0E0E0', fontSize: '13px', cursor: 'pointer' }}>
+            <input
+              type="checkbox"
+              checked={showCeiling}
+              onChange={(e) => setShowCeiling(e.target.checked)}
+              style={{ cursor: 'pointer' }}
+            />
+            Show Ceilings
+          </label>
         </div>
-        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#E0E0E0', fontSize: '13px', cursor: 'pointer' }}>
-          <input
-            type="checkbox"
-            checked={showCeiling}
-            onChange={(e) => setShowCeiling(e.target.checked)}
-            style={{ cursor: 'pointer' }}
-          />
-          Show Ceilings
-        </label>
-      </div>
+      )}
 
       {/* 3D Canvas */}
       <div className="canvas-wrapper">
@@ -145,13 +173,21 @@ function Building3D() {
             maxPolarAngle={Math.PI / 2.1}
             minDistance={3}
             maxDistance={20}
+            enablePan={true}
+            enableZoom={true}
+            enableRotate={true}
+            touches={{
+              ONE: 2, // TOUCH.ROTATE
+              TWO: 1  // TOUCH.DOLLY_PAN
+            }}
           />
         </Canvas>
       </div>
 
       {/* Controls hint */}
       <div className="controls-hint">
-        Drag to rotate &middot; Scroll to zoom &middot; Right-click drag to pan
+        <span className="desktop-hint">Drag to rotate &middot; Scroll to zoom &middot; Right-click drag to pan</span>
+        <span className="mobile-hint">Touch to rotate &middot; Pinch to zoom &middot; Two fingers to pan</span>
       </div>
     </div>
   )
